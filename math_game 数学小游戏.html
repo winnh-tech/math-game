@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数学小勇士</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #e8f4fd;
+  --sun: #ffd93d;
+  --grass: #6bcb77;
+  --cloud: #ffffff;
+  --orange: #ff6b35;
+  --blue: #4d9de0;
+  --purple: #9b5de5;
+  --pink: #f72585;
+  --teal: #4ecdc4;
+  --dark: #1a1a2e;
+  --mid: #16213e;
+  --card: #ffffff;
+  --r: 20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--sky);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── BACKGROUND ─── */
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(180deg, #c9e8ff 0%, #e8f6ff 60%, #d4f5d4 100%);
+  overflow: hidden;
+}
+.sun {
+  position: absolute; top: 30px; right: 80px;
+  width: 80px; height: 80px;
+  background: var(--sun);
+  border-radius: 50%;
+  box-shadow: 0 0 40px #ffd93d88;
+  animation: pulse-sun 3s ease-in-out infinite;
+}
+@keyframes pulse-sun { 0%,100%{box-shadow:0 0 40px #ffd93d88} 50%{box-shadow:0 0 70px #ffd93dcc} }
+.cloud {
+  position: absolute; background: white; border-radius: 50px;
+  opacity: .85;
+  animation: drift linear infinite;
+}
+.cloud::before, .cloud::after {
+  content:''; position:absolute; background:white; border-radius:50%;
+}
+.c1{width:120px;height:40px;top:60px;left:-150px;animation-duration:22s;animation-delay:-5s;}
+.c1::before{width:60px;height:55px;top:-28px;left:18px;}
+.c1::after{width:45px;height:45px;top:-22px;left:55px;}
+.c2{width:90px;height:30px;top:120px;left:-120px;animation-duration:30s;animation-delay:-12s;}
+.c2::before{width:50px;height:44px;top:-22px;left:12px;}
+.c2::after{width:36px;height:36px;top:-18px;left:42px;}
+.c3{width:150px;height:45px;top:40px;left:-180px;animation-duration:26s;animation-delay:-20s;}
+.c3::before{width:70px;height:60px;top:-32px;left:25px;}
+.c3::after{width:55px;height:50px;top:-26px;left:70px;}
+@keyframes drift { from{transform:translateX(-200px)} to{transform:translateX(110vw)} }
+
+.mountain {
+  position: absolute; bottom: 0;
+  width: 0; height: 0;
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid;
+}
+.m1{border-left-width:200px;border-right-width:200px;border-bottom-width:160px;border-bottom-color:#b8ddb0;left:-60px;}
+.m2{border-left-width:280px;border-right-width:280px;border-bottom-width:200px;border-bottom-color:#9ecf96;left:120px;}
+.m3{border-left-width:240px;border-right-width:240px;border-bottom-width:180px;border-bottom-color:#b8ddb0;right:40px;}
+.m4{border-left-width:180px;border-right-width:180px;border-bottom-width:140px;border-bottom-color:#c8e6c0;right:200px;}
+.ground { position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(180deg,#a8d5a2,#88c07a); }
+
+/* ─── LAYOUT ─── */
+#app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 16px 40px;
+}
+
+/* ─── SCREENS ─── */
+.screen { display: none; width: 100%; max-width: 560px; }
+.screen.on { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+/* ─── HOME SCREEN ─── */
+.home-hero {
+  text-align: center; margin-top: 12px;
+}
+.mascot { font-size: 88px; line-height: 1; display: block; animation: hop 1.8s ease-in-out infinite; }
+@keyframes hop { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-18px) rotate(3deg)} }
+
+.game-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 52px; font-weight: 800;
+  color: var(--dark);
+  text-shadow: 4px 4px 0 rgba(0,0,0,.08);
+  line-height: 1.1;
+}
+.game-sub { font-size: 17px; color: #555; font-weight: 700; margin-top: 4px; }
+
+.home-card {
+  background: white;
+  border-radius: 28px;
+  padding: 24px 28px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,.10), 0 2px 0 rgba(0,0,0,.04);
+}
+.card-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 18px; font-weight: 700;
+  color: var(--dark); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* op toggles */
+.ops-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.op-tog {
+  flex: 1; min-width: 60px;
+  padding: 12px 6px;
+  border: 3px solid #eee;
+  border-radius: 16px;
+  background: #fafafa;
+  cursor: pointer;
+  text-align: center;
+  transition: all .18s;
+  user-select: none;
+}
+.op-tog .sym { font-family:'Baloo 2',cursive; font-size:28px; line-height:1; display:block; }
+.op-tog .nam { font-size:12px; font-weight:700; color:#bbb; margin-top:2px; }
+.op-tog.on { border-color: var(--orange); background:#fff5f0; }
+.op-tog.on .nam { color: var(--dark); }
+.op-tog[data-op="+"].on { border-color:var(--grass); background:#f2fff3; }
+.op-tog[data-op="-"].on { border-color:var(--blue); background:#f0f8ff; }
+.op-tog[data-op="×"].on { border-color:var(--purple); background:#f8f0ff; }
+.op-tog[data-op="÷"].on { border-color:var(--pink); background:#fff0f6; }
+
+/* difficulty pills */
+.diff-row { display:flex; gap:8px; }
+.diff-pill {
+  flex:1; padding:10px 6px;
+  border:3px solid #eee; border-radius:14px;
+  background:#fafafa; cursor:pointer;
+  text-align:center; font-weight:700; font-size:13px; color:#bbb;
+  transition:all .18s; user-select:none;
+}
+.diff-pill .di { font-size:20px; display:block; margin-bottom:3px; }
+.diff-pill.on { border-color:var(--sun); background:#fffde8; color:var(--dark); }
+
+.btn-start {
+  width:100%; padding:18px;
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
+  color:white; border:none; border-radius:22px;
+  font-family:'Baloo 2',cursive; font-size:28px; font-weight:800;
+  cursor:pointer; letter-spacing:1px;
+  box-shadow: 0 6px 20px rgba(255,107,53,.4), 0 0 0 4px rgba(255,107,53,.15);
+  transition:all .2s;
+}
+.btn-start:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(255,107,53,.5), 0 0 0 4px rgba(255,107,53,.2); }
+.btn-start:active { transform:translateY(0); }
+
+/* ─── GAME SCREEN ─── */
+.game-hud {
+  width:100%; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.hud-prog { flex:1; min-width:160px; }
+.hud-prog-label { font-size:13px; font-weight:700; color:#555; margin-bottom:5px; }
+.prog-track { height:14px; background:rgba(255,255,255,.7); border-radius:8px; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,.08); }
+.prog-fill { height:100%; background:linear-gradient(90deg,var(--grass),var(--sun)); border-radius:8px; transition:width .4s cubic-bezier(.34,1.56,.64,1); }
+.hud-score {
+  background:white; border-radius:50px; padding:8px 18px;
+  font-family:'Baloo 2',cursive; font-size:20px; font-weight:800; color:var(--dark);
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  display:flex; align-items:center; gap:6px;
+}
+.hud-timer {
+  background:white; border-radius:50px; padding:8px 16px;
+  font-family:'Baloo 2',cursive; font-size:20px; font-weight:800; color:var(--dark);
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  min-width:72px; text-align:center;
+  transition:color .2s;
+}
+.hud-timer.warn { color:var(--orange); animation:tick .4s ease-in-out infinite; }
+@keyframes tick { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+.q-card {
+  width:100%; background:white;
+  border-radius:32px; padding:36px 28px 28px;
+  text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.12), 0 2px 0 rgba(0,0,0,.04);
+  position:relative; overflow:hidden;
+}
+.q-card::after {
+  content:''; position:absolute;
+  top:-50px; right:-50px; width:160px; height:160px;
+  background:radial-gradient(circle,rgba(255,217,61,.25),transparent 70%);
+  border-radius:50%; pointer-events:none;
+}
+.q-no { font-size:13px; font-weight:700; color:#ccc; letter-spacing:2px; margin-bottom:8px; }
+.q-expr {
+  font-family:'Baloo 2',cursive; font-size:58px; font-weight:800;
+  color:var(--dark); line-height:1.15; margin-bottom:16px;
+}
+.q-expr .c-add{color:var(--grass)} .q-expr .c-sub{color:var(--blue)}
+.q-expr .c-mul{color:var(--purple)} .q-expr .c-div{color:var(--pink)}
+
+.ans-row {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.eq { font-family:'Baloo 2',cursive; font-size:44px; color:#ddd; }
+.ans-box {
+  width:120px; height:68px;
+  font-family:'Baloo 2',cursive; font-size:40px; font-weight:800;
+  text-align:center; border:4px solid #eee; border-radius:18px;
+  background:#fafafa; color:var(--dark); outline:none;
+  transition:all .2s; caret-color:var(--orange);
+}
+.ans-box:focus { border-color:var(--orange); background:white; box-shadow:0 0 0 4px rgba(255,107,53,.12); }
+.ans-box.ok { border-color:var(--grass); background:#f0fff3; color:var(--grass); }
+.ans-box.no { border-color:var(--orange); background:#fff5f0; color:var(--orange); animation:shake .35s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} }
+
+.fb { font-family:'Baloo 2',cursive; font-size:22px; min-height:30px; margin-top:10px; transition:all .25s; }
+.fb.ok{color:var(--grass)} .fb.no{color:var(--orange)}
+
+/* numpad */
+.numpad {
+  width:100%; display:grid;
+  grid-template-columns:repeat(3,1fr); gap:10px;
+  max-width:340px;
+}
+.np {
+  padding:16px; font-family:'Baloo 2',cursive; font-size:26px; font-weight:700;
+  border:3px solid #e8e8e8; border-radius:18px; background:white;
+  cursor:pointer; transition:all .15s; color:var(--dark);
+  box-shadow:0 4px 0 #e0e0e0; user-select:none;
+}
+.np:active { transform:translateY(3px); box-shadow:0 1px 0 #e0e0e0; }
+.np.del { background:#fff5f0; border-color:#ffd6c8; color:var(--orange); }
+.np.ok-btn {
+  grid-column:span 2;
+  background:linear-gradient(135deg,var(--grass),#52c45c);
+  color:white; border-color:var(--grass);
+  box-shadow:0 4px 0 #4aaa54;
+  font-size:20px;
+}
+.np.ok-btn:active { box-shadow:0 1px 0 #4aaa54; }
+
+/* ─── RESULT SCREEN ─── */
+.result-card {
+  width:100%; background:white; border-radius:32px;
+  padding:36px 28px; text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.12);
+}
+.result-mascot { font-size:80px; display:block; margin-bottom:8px; animation:hop 2s ease-in-out infinite; }
+.result-title { font-family:'Baloo 2',cursive; font-size:36px; font-weight:800; color:var(--dark); }
+.stars { font-size:44px; letter-spacing:6px; margin:10px 0; }
+.big-score { font-family:'Baloo 2',cursive; font-size:80px; font-weight:800; line-height:1; color:var(--orange); }
+.score-label { font-size:16px; color:#999; font-weight:700; margin-bottom:20px; }
+
+.stats-row { display:flex; gap:12px; margin:16px 0; }
+.stat-box {
+  flex:1; background:#f8f8f8; border-radius:18px; padding:14px 8px;
+}
+.stat-val { font-family:'Baloo 2',cursive; font-size:28px; font-weight:800; color:var(--dark); }
+.stat-lbl { font-size:12px; color:#aaa; font-weight:700; margin-top:2px; }
+
+.review-wrap { max-height:220px; overflow-y:auto; margin:12px 0; border-radius:12px; }
+.review-wrap::-webkit-scrollbar{width:4px;}
+.review-wrap::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
+table.rev { width:100%; border-collapse:collapse; font-size:14px; }
+table.rev th { padding:8px 10px; background:#f5f5f5; color:#aaa; font-weight:700; font-size:11px; letter-spacing:1px; text-align:left; }
+table.rev td { padding:8px 10px; border-bottom:1px solid #f5f5f5; font-weight:700; }
+.tag-ok{color:var(--grass)} .tag-no{color:var(--orange)}
+
+.result-btns { display:flex; gap:12px; margin-top:20px; }
+.btn-again {
+  flex:1; padding:16px;
+  background:linear-gradient(135deg,var(--orange),#ff8e53);
+  color:white; border:none; border-radius:18px;
+  font-family:'Baloo 2',cursive; font-size:22px; font-weight:800;
+  cursor:pointer; box-shadow:0 5px 16px rgba(255,107,53,.35);
+  transition:all .2s;
+}
+.btn-again:hover{transform:translateY(-2px);}
+.btn-home {
+  flex:1; padding:16px;
+  background:white; color:var(--dark);
+  border:3px solid #eee; border-radius:18px;
+  font-family:'Baloo 2',cursive; font-size:22px; font-weight:800;
+  cursor:pointer; transition:all .2s;
+}
+.btn-home:hover{background:#f5f5f5;}
+
+/* confetti */
+.confetti-piece {
+  position:fixed; width:9px; height:9px; border-radius:2px;
+  animation:cfall linear forwards; pointer-events:none; z-index:9999;
+}
+@keyframes cfall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+  100%{transform:translateY(105vh) rotate(800deg);opacity:0}
+}
+
+@media(max-width:420px){
+  .q-expr{font-size:44px}
+  .game-title{font-size:40px}
+  .mascot{font-size:70px}
+}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="mountain m1"></div>
+  <div class="mountain m2"></div>
+  <div class="mountain m3"></div>
+  <div class="mountain m4"></div>
+  <div class="ground"></div>
+</div>
+
+<div id="app">
+
+  <!-- HOME -->
+  <div class="screen on" id="s-home">
+    <div class="home-hero">
+      <span class="mascot">🦊</span>
+      <div class="game-title">数学小勇士</div>
+      <div class="game-sub">每天50题，越来越厉害！</div>
+    </div>
+
+    <div class="home-card">
+      <div class="card-title">📐 选择运算</div>
+      <div class="ops-row">
+        <div class="op-tog on" data-op="+"><span class="sym" style="color:#6bcb77">+</span><span class="nam">加法</span></div>
+        <div class="op-tog on" data-op="-"><span class="sym" style="color:#4d9de0">−</span><span class="nam">减法</span></div>
+        <div class="op-tog" data-op="×"><span class="sym" style="color:#9b5de5">×</span><span class="nam">乘法</span></div>
+        <div class="op-tog" data-op="÷"><span class="sym" style="color:#f72585">÷</span><span class="nam">除法</span></div>
+      </div>
+    </div>
+
+    <div class="home-card">
+      <div class="card-title">⭐ 难度</div>
+      <div class="diff-row">
+        <div class="diff-pill" data-diff="easy"><span class="di">🌱</span>简单<br><small style="color:#bbb">≤20</small></div>
+        <div class="diff-pill on" data-diff="medium"><span class="di">🌟</span>中等<br><small style="color:#bbb">≤50</small></div>
+        <div class="diff-pill" data-diff="hard"><span class="di">🔥</span>较难<br><small style="color:#bbb">≤100</small></div>
+      </div>
+    </div>
+
+    <button class="btn-start" onclick="startGame()">🚀 开始闯关！</button>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="s-game">
+    <div class="game-hud">
+      <div class="hud-prog">
+        <div class="hud-prog-label" id="hud-label">第 1 / 50 题</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <div class="hud-score">⭐ <span id="hud-score">0</span></div>
+      <div class="hud-timer" id="hud-timer">0:00</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-no" id="q-no">第 1 题</div>
+      <div class="q-expr" id="q-expr"></div>
+      <div class="ans-row">
+        <span class="eq">=</span>
+        <input class="ans-box" id="ans-box" type="number" inputmode="numeric" placeholder="?" readonly>
+      </div>
+      <div class="fb" id="fb"></div>
+    </div>
+
+    <div class="numpad">
+      <button class="np" onclick="np('7')">7</button>
+      <button class="np" onclick="np('8')">8</button>
+      <button class="np" onclick="np('9')">9</button>
+      <button class="np" onclick="np('4')">4</button>
+      <button class="np" onclick="np('5')">5</button>
+      <button class="np" onclick="np('6')">6</button>
+      <button class="np" onclick="np('1')">1</button>
+      <button class="np" onclick="np('2')">2</button>
+      <button class="np" onclick="np('3')">3</button>
+      <button class="np del" onclick="npDel()">⌫</button>
+      <button class="np" onclick="np('0')">0</button>
+      <button class="np ok-btn" onclick="submit()">✓ 确认</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="s-result">
+    <div class="result-card">
+      <span class="result-mascot" id="r-mascot">🏆</span>
+      <div class="result-title" id="r-title">太厉害了！</div>
+      <div class="stars" id="r-stars">⭐⭐⭐</div>
+      <div class="big-score"><span id="r-correct">0</span><span style="font-size:36px;color:#ccc"> / 50</span></div>
+      <div class="score-label">答对题数</div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val" id="r-time">0:00</div>
+          <div class="stat-lbl">用时</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="r-acc">0%</div>
+          <div class="stat-lbl">正确率</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="r-streak">0</div>
+          <div class="stat-lbl">最长连对</div>
+        </div>
+      </div>
+
+      <div class="review-wrap">
+        <table class="rev">
+          <thead><tr><th>#</th><th>题目</th><th>你的答案</th><th>正确答案</th><th></th></tr></thead>
+          <tbody id="r-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="result-btns">
+        <button class="btn-again" onclick="replayGame()">🔄 再来一次</button>
+        <button class="btn-home" onclick="goHome()">🏠 重新设置</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TOTAL = 50;
+let ops = ['+', '-'], diff = 'medium';
+let questions = [], idx = 0, score = 0, answers = [];
+let timerStart, timerID, answered = false;
+let streak = 0, bestStreak = 0;
+
+// ── HOME interactions ──
+document.querySelectorAll('.op-tog').forEach(el => {
+  el.addEventListener('click', () => {
+    const active = el.classList.contains('on');
+    const otherOn = [...document.querySelectorAll('.op-tog.on')].filter(e => e !== el);
+    if (active && otherOn.length === 0) return;
+    el.classList.toggle('on');
+    ops = [...document.querySelectorAll('.op-tog.on')].map(e => e.dataset.op);
+  });
+});
+document.querySelectorAll('.diff-pill').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.diff-pill').forEach(e => e.classList.remove('on'));
+    el.classList.add('on');
+    diff = el.dataset.diff;
+  });
+});
+
+// ── Pool generation ──
+function buildPool() {
+  const maxMap = { easy: 20, medium: 50, hard: 100 };
+  const max = maxMap[diff];
+  const pool = [];
+  ops.forEach(op => {
+    if (op === '+') {
+      for (let a = 1; a <= max; a++)
+        for (let b = 1; a + b <= max; b++)
+          pool.push({ a, op, b, ans: a + b });
+    } else if (op === '-') {
+      for (let a = 2; a <= max; a++)
+        for (let b = 1; b < a; b++)
+          pool.push({ a, op, b, ans: a - b });
+    } else if (op === '×') {
+      const mf = diff === 'easy' ? 5 : diff === 'medium' ? 9 : 12;
+      for (let a = 2; a <= mf; a++)
+        for (let b = 2; b <= mf; b++)
+          pool.push({ a, op, b, ans: a * b });
+    } else {
+      const mf = diff === 'easy' ? 5 : diff === 'medium' ? 9 : 12;
+      for (let b = 2; b <= mf; b++)
+        for (let ans = 1; ans <= mf; ans++)
+          pool.push({ a: ans * b, op, b, ans });
+    }
+  });
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
+// ── Timer ──
+function startTimer() {
+  timerStart = Date.now();
+  timerID = setInterval(updateTimer, 500);
+}
+function updateTimer() {
+  const s = Math.floor((Date.now() - timerStart) / 1000);
+  const m = Math.floor(s / 60), ss = s % 60;
+  const el = document.getElementById('hud-timer');
+  el.textContent = `${m}:${String(ss).padStart(2,'0')}`;
+  el.classList.toggle('warn', s > 0 && ss <= 10 && m === 0);
+}
+function stopTimer() {
+  clearInterval(timerID);
+  const s = Math.floor((Date.now() - timerStart) / 1000);
+  return s;
+}
+function fmtTime(s) {
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+// ── Game flow ──
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+function startGame() {
+  const pool = buildPool();
+  questions = pool.slice(0, Math.min(TOTAL, pool.length));
+  idx = 0; score = 0; answers = []; streak = 0; bestStreak = 0;
+  answered = false;
+  show('s-game');
+  startTimer();
+  renderQ();
+}
+
+function replayGame() { startGame(); }
+function goHome() { clearInterval(timerID); show('s-home'); }
+
+function opColor(op) {
+  return { '+': 'c-add', '-': 'c-sub', '×': 'c-mul', '÷': 'c-div' }[op];
+}
+
+function renderQ() {
+  answered = false;
+  const box = document.getElementById('ans-box');
+  box.value = ''; box.classList.remove('ok','no');
+  document.getElementById('fb').textContent = '';
+  document.getElementById('fb').className = 'fb';
+
+  const q = questions[idx];
+  const cls = opColor(q.op);
+  document.getElementById('q-expr').innerHTML =
+    `<span>${q.a}</span> <span class="${cls}">${q.op}</span> <span>${q.b}</span>`;
+  document.getElementById('q-no').textContent = `第 ${idx + 1} 题`;
+  document.getElementById('hud-label').textContent = `第 ${idx + 1} / ${questions.length} 题`;
+  document.getElementById('prog-fill').style.width = `${(idx / questions.length) * 100}%`;
+  document.getElementById('hud-score').textContent = score;
+  box.focus();
+}
+
+function np(v) {
+  if (answered) return;
+  const box = document.getElementById('ans-box');
+  if (box.value.length >= 4) return;
+  box.value += v;
+}
+function npDel() {
+  if (answered) return;
+  const box = document.getElementById('ans-box');
+  box.value = box.value.slice(0, -1);
+}
+
+function submit() {
+  if (answered) { next(); return; }
+  const box = document.getElementById('ans-box');
+  const val = box.value.trim();
+  if (!val) return;
+
+  answered = true;
+  const q = questions[idx];
+  const userAns = parseInt(val);
+  const correct = userAns === q.ans;
+  const fb = document.getElementById('fb');
+
+  answers[idx] = { userAns, correct };
+
+  if (correct) {
+    box.classList.add('ok');
+    fb.className = 'fb ok';
+    const msgs = ['太棒了！🌟','答对啦！✨','真厉害！🎉','完全正确！👏','超级棒！🥳','666！🔥'];
+    fb.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    box.classList.add('no');
+    fb.className = 'fb no';
+    fb.textContent = `正确答案是 ${q.ans} 哦 😊`;
+    streak = 0;
+  }
+  document.getElementById('hud-score').textContent = score;
+  setTimeout(next, 1100);
+}
+
+function next() {
+  idx++;
+  if (idx >= questions.length) { showResult(); }
+  else { renderQ(); }
+}
+
+function showResult() {
+  const elapsed = stopTimer();
+  show('s-result');
+
+  const pct = score / questions.length;
+  let mascot, title, stars;
+  if (score === questions.length) { mascot='🏆'; title='满分！你是数学小天才！'; stars='⭐⭐⭐'; confetti(); }
+  else if (pct >= 0.90) { mascot='🥇'; title='非常棒！差一点点满分！'; stars='⭐⭐⭐'; confetti(); }
+  else if (pct >= 0.70) { mascot='🥈'; title='很不错！继续加油！'; stars='⭐⭐'; }
+  else if (pct >= 0.50) { mascot='💪'; title='不错哦，再练练！'; stars='⭐'; }
+  else { mascot='😊'; title='加油！你下次一定行！'; stars=''; }
+
+  document.getElementById('r-mascot').textContent = mascot;
+  document.getElementById('r-title').textContent = title;
+  document.getElementById('r-stars').textContent = stars;
+  document.getElementById('r-correct').textContent = score;
+  document.getElementById('r-time').textContent = fmtTime(elapsed);
+  document.getElementById('r-acc').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('r-streak').textContent = bestStreak;
+
+  const tbody = document.getElementById('r-tbody');
+  tbody.innerHTML = '';
+  questions.forEach((q, i) => {
+    const a = answers[i] || { userAns: '—', correct: false };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${q.a} ${q.op} ${q.b}</td>
+      <td class="${a.correct?'tag-ok':'tag-no'}">${a.userAns}</td>
+      <td>${q.ans}</td>
+      <td>${a.correct?'✅':'❌'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('s-game').classList.contains('on')) return;
+  if (e.key >= '0' && e.key <= '9') np(e.key);
+  else if (e.key === 'Backspace') npDel();
+  else if (e.key === 'Enter') submit();
+});
+
+// confetti
+function confetti() {
+  const colors = ['#ff6b35','#ffd93d','#6bcb77','#4d9de0','#9b5de5','#f72585','#4ecdc4'];
+  for (let i = 0; i < 90; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const size = 7 + Math.random() * 10;
+    el.style.cssText = `
+      left:${Math.random()*100}vw; top:-12px;
+      width:${size}px; height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-delay:${Math.random()*1.2}s;
+      animation-duration:${2.2+Math.random()*1.5}s;
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+</script>
+</body>
+</html>
