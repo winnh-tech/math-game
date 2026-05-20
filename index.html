@@ -368,7 +368,7 @@ table.rev td { padding:8px 10px; border-bottom:1px solid #f5f5f5; font-weight:70
         <div class="hud-prog-label" id="hud-label">第 1 / 50 题</div>
         <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
       </div>
-      <div class="hud-score">⭐ <span id="hud-score">0</span></div>
+      <div class="hud-score">⭐ <span id="hud-score">?</span></div>
       <div class="hud-timer" id="hud-timer">0:00</div>
     </div>
 
@@ -544,8 +544,6 @@ function renderQ() {
   answered = false;
   const box = document.getElementById('ans-box');
   box.value = ''; box.classList.remove('ok','no');
-  document.getElementById('fb').textContent = '';
-  document.getElementById('fb').className = 'fb';
 
   const q = questions[idx];
   const cls = opColor(q.op);
@@ -554,7 +552,6 @@ function renderQ() {
   document.getElementById('q-no').textContent = `第 ${idx + 1} 题`;
   document.getElementById('hud-label').textContent = `第 ${idx + 1} / ${questions.length} 题`;
   document.getElementById('prog-fill').style.width = `${(idx / questions.length) * 100}%`;
-  document.getElementById('hud-score').textContent = score;
   box.focus();
 }
 
@@ -580,26 +577,19 @@ function submit() {
   const q = questions[idx];
   const userAns = parseInt(val);
   const correct = userAns === q.ans;
-  const fb = document.getElementById('fb');
 
   answers[idx] = { userAns, correct };
 
   if (correct) {
-    box.classList.add('ok');
-    fb.className = 'fb ok';
-    const msgs = ['太棒了！🌟','答对啦！✨','真厉害！🎉','完全正确！👏','超级棒！🥳','666！🔥'];
-    fb.textContent = msgs[Math.floor(Math.random() * msgs.length)];
     score++;
     streak++;
     if (streak > bestStreak) bestStreak = streak;
   } else {
-    box.classList.add('no');
-    fb.className = 'fb no';
-    fb.textContent = `正确答案是 ${q.ans} 哦 😊`;
     streak = 0;
   }
-  document.getElementById('hud-score').textContent = score;
-  setTimeout(next, 1100);
+
+  // no visual feedback — go straight to next question
+  next();
 }
 
 function next() {
